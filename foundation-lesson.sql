@@ -19,12 +19,9 @@ Rather than * to select all columns, choose the columns you want
 */
 SELECT
 	PatientId
-	
-	,Hospital
-	
-	,Ward
-	
-	,AdmittedDate
+		,Hospital
+		,Ward
+		,AdmittedDate
 FROM
 	PatientStay;
 
@@ -35,15 +32,10 @@ Using a table alias (ps in the example below) is good practice and helps in a fe
 */
 SELECT
 	p.PatientId
-	
 	,p.AdmittedDate
-	
 	,p.DischargeDate
-	
 	,p.Ward
-	
 	,p.Tariff
-	
 	,p.Hospital
 FROM
 	PatientStay p;
@@ -54,6 +46,13 @@ Note: we can also AND and OR clauses
 SELECT
 	ps.PatientId
 	,ps.AdmittedDate
+	,ps.DischargeDate
+	
+	,DATEADD(week, -2, ps.AdmittedDate) AS ReminderDate
+	
+	,DATEADD (MONTH, 3, PS.DischargeDate) AS Appointmentdate --3mths after discharge
+	
+	,DATEDIFF (day, PS.aDMITTEDDATE, PS. DISCHARGEDATE) AS 'DaysinHospital'
 	,ps.Hospital
 	,ps.Ward
 	,ps.Tariff
@@ -61,9 +60,12 @@ FROM
 	PatientStay ps
 WHERE ps.Hospital IN ('Kingston', 'pruh')
 	AND ps.Ward LIKE '%surgery'
-	AND ps.AdmittedDate BETWEEN '2024-03-02' AND '2024-02-27'
-ORDER BY ps.AdmittedDate DESC, ps.Ward
+	AND ps.AdmittedDate BETWEEN DATEFROMPARTS(2024,2,26) AND DATEFROMPARTS(2024,3,01)
+ORDER BY ps.AdmittedDate DESC, 
+		ps.Ward ASC
 
+SELECT
+	DATEFROMPARTS (2025,07,30) AS TheDate
 
 /*
 some alternative WHERE clauses.  Try these out
@@ -80,13 +82,9 @@ _ means any single character
 
 SELECT
 	ps.PatientId
-	
 	,ps.AdmittedDate
-	
 	,ps.Hospital
-	
 	,ps.Ward
-	
 	,ps.Tariff
 FROM
 	PatientStay ps
@@ -102,13 +100,9 @@ Sorts smallest to largest (ASCending) by default
 -- ORDER BY a single column
 SELECT
 	ps.PatientId
-	
 	,ps.AdmittedDate
-	
 	,ps.Hospital
-	
 	,ps.Ward
-	
 	,ps.Tariff
 FROM
 	PatientStay ps
@@ -118,13 +112,9 @@ ORDER BY
 -- ORDER BY several columns
 SELECT
 	ps.PatientId
-	
 	,ps.AdmittedDate
-	
 	,ps.Hospital
-	
 	,ps.Ward
-	
 	,ps.Tariff
 FROM
 	PatientStay ps
@@ -253,3 +243,18 @@ FROM
 	PatientStay ps
 	JOIN DimHospital h ON
 	ps.Hospital = h.Hospital;
+
+
+SELECT
+	ps.Hospital
+		,COUNT(*) AS NumberOfPatients
+    	,SUM(ps.Tariff) AS TotalTariff
+		,AVG(ps.tariff) AS AverageTariff
+FROM
+	PatientStay ps
+GROUP BY
+	ps.Hospital
+ORDER BY
+	NumberOfPatients DESC
+
+
